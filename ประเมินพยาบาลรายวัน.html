@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินสมรรถนะพยาบาลวิชาชีพ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [formData, setFormData] = React.useState({
+                firstName: '', lastName: '', institution: '', placeOfBirth: '', startDate: '',
+                f1: '3', f2: '3', f3: '3', f4: '3',
+                c1: '3', c2: '3', c3: '3',
+                b1: '3', b2: '3', b3: '3', b4: '3',
+                generalComments: '',
+                recommendation: 'appoint'
+            });
+
+            const [submitted, setSubmitted] = React.useState(false);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                // นำไปเชื่อมต่อกับ Google Script URL ของคุณที่นี่
+                // const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
+                setSubmitted(true);
+            };
+
+            const levels = [
+                { val: '1', label: 'ต้องพัฒนา' },
+                { val: '2', label: 'พอใช้' },
+                { val: '3', label: 'ตามมาตรฐาน' },
+                { val: '4', label: 'ดีมาก' },
+                { val: '5', label: 'เป็นเลิศ' }
+            ];
+
+            const RatingRow = ({ label, name }) => (
+                <div className="flex flex-col md:flex-row md:items-center py-3 border-b border-gray-100">
+                    <span className="w-full md:w-1/3 text-sm text-gray-700 font-medium mb-2 md:mb-0">{label}</span>
+                    <div className="flex justify-between w-full md:w-2/3 px-2 overflow-x-auto gap-2">
+                        {levels.map(lvl => (
+                            <label key={lvl.val} className="flex flex-col items-center cursor-pointer min-w-[50px]">
+                                <input type="radio" name={name} value={lvl.val} checked={formData[name] === lvl.val} onChange={handleInputChange} className="h-4 w-4 text-emerald-600" />
+                                <span className="text-[10px] text-gray-500 text-center">{lvl.val} ({lvl.label})</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50 p-2 md:p-8">
+                    {!submitted ? (
+                        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                            <header className="bg-emerald-800 p-6 text-white text-center">
+                                <h1 className="text-xl font-bold">แบบประเมินศักยภาพพยาบาลวิชาชีพ</h1>
+                                <p className="text-emerald-200 text-sm">เพื่อการบรรจุข้าราชการ</p>
+                            </header>
+
+                            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                                <div className="grid md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                                    <input name="firstName" placeholder="ชื่อ" className="p-2 border rounded" onChange={handleInputChange} required />
+                                    <input name="lastName" placeholder="นามสกุล" className="p-2 border rounded" onChange={handleInputChange} required />
+                                    <input name="placeOfBirth" placeholder="จังหวัดที่เกิด" className="p-2 border rounded" onChange={handleInputChange} />
+                                    <input name="institution" placeholder="สถาบันการศึกษา" className="p-2 border rounded" onChange={handleInputChange} />
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs text-gray-500 block mb-1">วัน/เดือน/ปี ที่เริ่มปฏิบัติงาน</label>
+                                        <input name="startDate" type="date" className="w-full p-2 border rounded" onChange={handleInputChange} required />
+                                    </div>
+                                </div>
+
+                                <section>
+                                    <h2 className="font-bold text-emerald-800 mb-4 border-b pb-2">1. สมรรถนะตามตำแหน่ง (Functional)</h2>
+                                    <RatingRow label="ความรู้และทักษะทางการพยาบาล" name="f1" />
+                                    <RatingRow label="การใช้เครื่องมือทางการแพทย์" name="f2" />
+                                    <RatingRow label="คุณภาพของงาน (ความถูกต้อง/ปลอดภัย)" name="f3" />
+                                    <RatingRow label="การตัดสินใจทางคลินิก/แก้ปัญหา" name="f4" />
+                                </section>
+
+                                <section>
+                                    <h2 className="font-bold text-emerald-800 mb-4 border-b pb-2">2. สมรรถนะหลัก (Core Competency)</h2>
+                                    <RatingRow label="การบริการที่ดี (Service Mind)" name="c1" />
+                                    <RatingRow label="จริยธรรมและจรรยาบรรณวิชาชีพ" name="c2" />
+                                    <RatingRow label="การมุ่งผลสัมฤทธิ์และพัฒนาตนเอง" name="c3" />
+                                </section>
+
+                                <section>
+                                    <h2 className="font-bold text-emerald-800 mb-4 border-b pb-2">3. พฤติกรรมและการปรับตัว (Behavioral)</h2>
+                                    <RatingRow label="ความประพฤติและวินัยราชการ" name="b1" />
+                                    <RatingRow label="การทำงานเป็นทีม/ประสานงาน" name="b2" />
+                                    <RatingRow label="มนุษยสัมพันธ์และการควบคุมอารมณ์" name="b3" />
+                                    <RatingRow label="ความซื่อสัตย์/ไว้ใจได้" name="b4" />
+                                </section>
+
+                                <div className="space-y-4">
+                                    <textarea name="generalComments" placeholder="ความคิดเห็นเพิ่มเติม..." className="w-full p-3 border rounded-lg h-24" onChange={handleInputChange}></textarea>
+                                    <select name="recommendation" className="w-full p-3 rounded border font-bold text-emerald-800" onChange={handleInputChange}>
+                                        <option value="appoint">เห็นควรได้รับการบรรจุเป็นข้าราชการ</option>
+                                        <option value="extend">เห็นควรให้ขยายเวลาทดลองปฏิบัติงานต่อ</option>
+                                        <option value="terminate">เห็นควรให้ออกจากราชการ</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" className="w-full bg-emerald-800 text-white p-4 rounded-lg font-bold hover:bg-emerald-900">บันทึกผลการประเมิน</button>
+                            </form>
+                        </div>
+                    ) : (
+                        <div id="print-area" className="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-xl">
+                            <h2 className="text-2xl font-bold text-emerald-800 mb-6">รายงานสรุปผลการประเมิน</h2>
+                            <div className="grid grid-cols-2 gap-4 mb-8 border-b pb-4">
+                                <div><p className="text-gray-500">ชื่อ-นามสกุล</p><p className="font-bold">{formData.firstName} {formData.lastName}</p></div>
+                                <div><p className="text-gray-500">วันที่เริ่มงาน</p><p className="font-bold">{formData.startDate}</p></div>
+                                <div><p className="text-gray-500">จังหวัดที่เกิด</p><p className="font-bold">{formData.placeOfBirth}</p></div>
+                                <div><p className="text-gray-500">สรุปการพิจารณา</p><p className="font-bold text-emerald-700">{formData.recommendation === 'appoint' ? 'เห็นควรบรรจุ' : formData.recommendation === 'extend' ? 'ขยายเวลาทดลองงาน' : 'ให้ออกจากราชการ'}</p></div>
+                            </div>
+                            <p className="mb-6"><strong>ความเห็นเพิ่มเติม:</strong> {formData.generalComments || "-"}</p>
+                            <div className="no-print flex gap-4">
+                                <button onClick={() => window.print()} className="bg-emerald-600 text-white px-6 py-2 rounded-lg">พิมพ์เป็น PDF</button>
+                                <button onClick={() => setSubmitted(false)} className="bg-gray-200 px-6 py-2 rounded-lg">แก้ไขข้อมูล</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
